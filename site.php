@@ -7,6 +7,7 @@ use \Hcode\Model\Cart;
 use \Hcode\Model\Address;
 use \Hcode\Model\User;
 
+// Rota principal da Pagina
 $app->get('/', function() {
 
 	$products = Product::listAll();
@@ -18,6 +19,7 @@ $app->get('/', function() {
 
 });
 
+// Rota de categorias
 $app->get("/categories/:idcategory", function($idcategory){
 	
 	$page = (isset($_GET['page'])) ? (int)$_GET['page'] : 1;
@@ -43,6 +45,7 @@ $app->get("/categories/:idcategory", function($idcategory){
 	]);
 });
 
+// Rota de produtos
 $app->get("/products/:desurl", function($desurl){
 	$product = new Product();
 	$product->getFromUrl($desurl);
@@ -53,6 +56,7 @@ $app->get("/products/:desurl", function($desurl){
 	]);
 });
 
+// Rota de carrinho
 $app->get("/cart", function(){
 	$cart = Cart::getFromSession();
 	$page  = new Page();
@@ -119,6 +123,7 @@ $app->get("/checkout", function(){
 
 });
 
+// Rota de login
 $app->get("/login", function(){
 	$page = new Page();
 	$page->setTpl("login", [
@@ -145,6 +150,7 @@ $app->get("/logout", function(){
 	exit;
 });
 
+// Rota de cadastro
 $app->post("/register", function(){
 
 	$_SESSION['registerValues'] = $_POST;
@@ -186,6 +192,50 @@ $app->post("/register", function(){
 	User::login($_POST['email'], $_POST['password']);
 	header("Location: /checkout");
 	exit;
+});
+
+// Rota de Esqueci a Senha
+$app->get("/forgot", function(){
+	$page = new Page();
+	$page->setTpl("forgot");
+});
+
+$app->post("/forgot", function(){
+	$user = User::getForgot($_POST["email"], false);
+	header("Location: /forgot/sent");
+	exit;
+});
+
+$app->get("/forgot/sent", function(){
+	$page = new Page();
+	$page->setTpl("forgot-sent");
+});
+
+$app->get("/forgot/reset", function(){
+	$user = User::validForgotDecrypt($_GET["code"]);
+	$page = new Page();
+	$page->setTpl("forgot-reset",array(
+		"name"=>$user["desperson"],
+		"code"=>$_GET["code"]
+	));
+});
+
+$app->post("/forgot/reset", function(){
+	
+	$forgot = User::validForgotDecrypt($_POST["code"]);
+	User::setForgotUsed($forgot["idrecovery"]);
+	
+	$user = new User();
+	$user->get((int)$forgot["iduser"]);
+	$password = password_hash($_POST["password"], PASSWORD_DEFAULT,[
+		"cost"=>12
+	]);
+	$user->setPassword($password);
+
+	$page = new Page();
+
+	$page->setTpl("forgot-reset-success");
+
 });
 
 ?>
