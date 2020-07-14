@@ -34,7 +34,7 @@ $app->get("/admin/products", function(){
 	$page = new PageAdmin();
 
 	$page->setTpl("products",[
-		'products'=>$pagination['data'],
+		"products"=>$pagination['data'],
 		"search"=>$search,
 		"pages"=>$pages
 	]);
