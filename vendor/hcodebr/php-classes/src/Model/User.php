@@ -243,6 +243,13 @@ class User extends Model {
 		
 	}
 
+		public static function getPasswordHash($password)
+	{
+		return password_hash($password, PASSWORD_DEFAULT, [
+			'cost'=>12
+		]);
+	}
+
 	public static function setError($msg)
 	{
 		$_SESSION[User::ERROR] = $msg;
@@ -258,13 +265,6 @@ class User extends Model {
 	public static function clearError()
 	{
 		$_SESSION[User::ERROR] = NULL;
-	}
-
-	public static function getPasswordHash($password)
-	{
-		return password_hash($password, PASSWORD_DEFAULT, [
-			'cost'=>12
-		]);
 	}
 
 	public static function setErrorRegister($msg)
